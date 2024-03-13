@@ -1,59 +1,14 @@
 #include <iostream>
 #include <armadillo>
 #include <cmath>
+#include <tuple>
 
 using namespace std;
 
 double pi = M_PI;
 double g = 9.81;
 
-double moved_gravity_center(arma::rowvec vect_mass, arma::rowvec vect_pos){
-
-    double total_mass = arma::accu(vect_mass);
-    double somme = 0;
-
-    for(unsigned int i =0; i < vect_pos.n_elem; i++){ // itération sur le nombre d'item du vecteur
-        somme = somme + vect_mass(i)*vect_pos(i);
-    }
-
-    double new_position = somme / total_mass;
-    return new_position;
-
-}
-
-
-arma::colvec buoyancy_force(double rho, double V_tot, arma::colvec vector){
-    double buoyancy_norme = rho * V_tot * g;
-    arma::colvec F_b = buoyancy_norme * vector;
-    return F_b;
-
-}
-
-
-double rotor_speed(double radius, int RPM){
-
-    double v_rotor = 2 * pi * radius * (RPM/60);
-    return v_rotor;
-
-}
-
-
-double mass_flow(double rho, double area, double speed){
-
-    double m_dot = rho * area * speed; // [m/s]
-    return m_dot;
-
-}
-
-
-double cruise_speed(double area, double rho, double M_struct){
-
-    double g = 9.81;
-    double v_cruise = sqrt((M_struct * g)/ (2 * rho * area));
-    return v_cruise;
-
-}
-
+/* Matrice de rotation */
 
 arma::mat rotation_matrix(double phi, double theta, double psi){
 
@@ -75,6 +30,173 @@ arma::mat rotation_matrix(double phi, double theta, double psi){
 
 }
 
+arma::mat rotation_matrix_motor(double alpha){
+
+    arma::mat R_y = {{cos(alpha), 0, sin(alpha)},
+                     {0, 1, 0},
+                     {-sin(alpha), 0, cos(alpha)}};
+
+    return R_y;
+    
+}
+
+/* Déplacement du centre de gravité */
+
+double moved_gravity_center(arma::rowvec vect_mass, arma::rowvec vect_pos){
+
+    double total_mass = arma::accu(vect_mass);
+    double somme = 0;
+
+    for(unsigned int i =0; i < vect_pos.n_elem; i++){ // itération sur le nombre d'item du vecteur
+        somme = somme + vect_mass(i)*vect_pos(i);
+    }
+
+    double new_position = somme / total_mass;
+    return new_position;
+
+}
+
+/* Moment d'une force */
+
+arma::colvec moment_of_force(arma::colvec force, arma::colvec position_vector){
+    arma::colvec moment = arma::cross(position_vector, force);
+    /* Force appliquée en P, exprimée en 0 : M = OP ^ F */
+    return moment;
+}
+
+/* Fonction expressoin des composantes des forces */
+
+arma::colvec buoyancy_force(double rho, double V_tot, arma::colvec vector){
+    double buoyancy_norm = rho * V_tot * g;
+    arma::colvec F_b = buoyancy_norm * vector;
+    return F_b;
+}
+
+arma::colvec weigth_force(double m, arma::colvec vector){
+    double weight_norm = m * g;
+    arma::colvec F_p = weight_norm * vector;
+    return F_p;
+}
+
+arma::colvec prop_force(double constant, double rho, double RPM, double radius, arma::colvec vector){
+    double d = 2 * radius;
+    // constante étant le coeff de portance adimensionalisé de l'hélice
+    double prop_norm = constant * rho * pow(RPM/60, 2) * pow(d, 4);
+    arma::colvec F_prop = prop_norm * vector;
+    return F_prop;
+
+    /*
+    Autre façon de calculer la force :
+    F = b * (w_i)^2
+    avec b   : coeff de portance (en kg/m/s ?)
+         w_i : vitesse de rotation du moteur (en rad/s)
+    */
+
+}
+
+/* Fonction pour étude du système moteur */
+
+double rotor_speed(double radius, int RPM){
+    double v_rotor = 2 * pi * radius * (RPM/60);
+    return v_rotor;
+}
+
+
+double mass_flow(double rho, double area, double speed){
+    double m_dot = rho * area * speed; // [m/s]
+    return m_dot;
+}
+
+
+double cruise_speed(double area, double rho, double M_struct){
+    double v_cruise = sqrt((M_struct * g)/ (2 * rho * area));
+    return v_cruise;
+}
+
+/* Fonction pour changement de base */
+
+arma::colvec change_of_base_force(arma::colvec force, arma::mat rotation_matrix){
+
+    arma::mat inv_rotation_matrix = arma::inv(rotation_matrix);
+    arma::colvec new_force = force * inv_rotation_matrix;
+
+    /* Opération réaliser : M_{1*3} * M_{3*3} = M_{1*3} */
+
+    return new_force;
+}
+
+
+arma::colvec change_of_base_moment(arma::colvec moment, arma::mat rotation_matrix){
+
+    arma::mat inv_rotation_matrix = arma::inv(rotation_matrix);
+    arma::colvec new_moment = moment * inv_rotation_matrix;
+
+    /* Opération réaliser : M_{1*3} * M_{3*3} = M_{1*3} */
+
+    return new_moment;
+}
+
+/* Sous-Système moteur */
+
+tuple<arma::colvec, arma::colvec> sub_system_motor(arma::rowvec alpha){
+    /* Donneés */
+    double constant = 0.83;
+    double rho = 1.225;
+    arma::rowvec RPM = {10000, 20000, 15000, 17500};
+    double radius = (12.7/2)*1e-2;
+
+    /* TODO: ajouter le stabilisateur PID du sous-système moteur */
+    double F_x, F_y, F_z;
+    double M_x, M_y, M_z = 0;
+    arma::colvec x_m = {1, 0, 0};
+    arma::colvec y_m = {0, 1, 0};
+    arma::colvec z_m = {0, 0, 1};
+
+    double alpha_1 = alpha(0);
+    double alpha_2 = alpha(1);
+    double alpha_3 = alpha(2);
+    double alpha_4 = alpha(3);
+
+    arma::mat R_y_1 = rotation_matrix_motor(alpha_1);
+    arma::mat R_y_2 = rotation_matrix_motor(alpha_2);
+    arma::mat R_y_3 = rotation_matrix_motor(alpha_3);
+    arma::mat R_y_4 = rotation_matrix_motor(alpha_4);
+
+    arma::colvec z_r_1 = R_y_1 * z_m;
+    arma::colvec z_r_2 = R_y_2 * z_m;
+    arma::colvec z_r_3 = R_y_3 * z_m;
+    arma::colvec z_r_4 = R_y_4 * z_m;
+
+    /* Expression des forces de Poids du sous-stème moteur */
+    double m_sys = 0.1;
+    double m_mot = 0.037;
+    arma::colvec P_m = weigth_force(m_sys, -z_m);
+    arma::colvec P = weigth_force(m_mot, -z_m);
+
+    /* Expression des forces de poussée du sous-système moteur */
+    arma::colvec F_prop_1 = prop_force(constant, rho, RPM(0), radius, z_r_1);
+    arma::colvec F_prop_2 = prop_force(constant, rho, RPM(1), radius, z_r_2);
+    arma::colvec F_prop_3 = prop_force(constant, rho, RPM(2), radius, z_r_3);
+    arma::colvec F_prop_4 = prop_force(constant, rho, RPM(3), radius, z_r_4);
+
+    /* Equation des forces */
+    F_x = 4*P_m(0) + 4*P(0) + F_prop_1(0) + F_prop_2(0) + F_prop_3(0) + F_prop_4(0); 
+    F_y = 4*P_m(1) + 4*P(1) + F_prop_1(1) + F_prop_2(1) + F_prop_3(1) + F_prop_4(1); 
+    F_z = 4*P_m(2) + 4*P(2) + F_prop_1(2) + F_prop_2(2) + F_prop_3(2) + F_prop_4(2); 
+
+    arma::colvec F_mot = {F_x, F_y, F_z};
+    arma::colvec M_mot = {M_x, M_y, M_z};
+    
+    return make_tuple(F_mot, M_mot);
+}
+
+/* Sous-Système grappin */
+
+// tuple<arma::colvec, arma::colvec> grappling_hook(){
+    
+// }
+
+/* Programme boucle principale */
 
 int main() {
     /* Données */
@@ -124,6 +246,10 @@ int main() {
     cout << "La vitesse du rotor est : " << v_rotor << " m/s." << endl;
     cout << "Débit massique : " << m_dot << " kg/s." << endl;
     cout << "Vitesse rotor de croisière (compensation Poids Poussée) : " << v_cruise << " m/s, soit " << v_cruise * 3.6 << " km/h." <<endl;
+
+    arma::rowvec alpha = {pi/4, pi/4, -pi/4, -pi/4};
+    auto [F_mot, M_mot] = sub_system_motor(alpha);
+    cout << F_mot << endl;
 
     return 0;
 }
