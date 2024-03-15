@@ -2,11 +2,31 @@
 #include <armadillo>
 #include <cmath>
 #include <tuple>
+#include <typeinfo>
 
 using namespace std;
 
+/* Paramètres d'entrée */
+double rho = 1.225; // kg/m^3
 double pi = M_PI;
-double g = 9.81;
+double g = 9.81;  // m/s^2
+double radius = (12.7/2)*1e-2; // m
+double area = pi * radius * radius; // m^2
+double M_struct = 3.0; // kg
+double V_tot = 7.0; // m^3
+
+/* Vecteur dans la base du dirigeable */
+arma::colvec x_m = {1, 0, 0};
+arma::colvec y_m = {0, 1, 0};
+arma::colvec z_m = {0, 0, 1};
+
+/* Vecteur dans la base fixe */
+arma::colvec x_0 = {1, 0, 0};
+arma::colvec y_0 = {0, 1, 0};
+arma::colvec z_0 = {0, 0, 1};
+
+/* Vecteur nul*/
+arma::colvec zeros = {0, 0, 0};
 
 /* Matrice de rotation */
 
@@ -54,14 +74,6 @@ double moved_gravity_center(arma::rowvec vect_mass, arma::rowvec vect_pos){
     double new_position = somme / total_mass;
     return new_position;
 
-}
-
-/* Moment d'une force */
-
-arma::colvec moment_of_force(arma::colvec force, arma::colvec position_vector){
-    arma::colvec moment = arma::cross(position_vector, force);
-    /* Force appliquée en P, exprimée en 0 : M = OP ^ F */
-    return moment;
 }
 
 /* Fonction expressoin des composantes des forces */
@@ -125,7 +137,6 @@ arma::colvec change_of_base_force(arma::colvec force, arma::mat rotation_matrix)
     return new_force;
 }
 
-
 arma::colvec change_of_base_moment(arma::colvec moment, arma::mat rotation_matrix){
 
     arma::mat inv_rotation_matrix = arma::inv(rotation_matrix);
@@ -136,58 +147,84 @@ arma::colvec change_of_base_moment(arma::colvec moment, arma::mat rotation_matri
     return new_moment;
 }
 
-/* Sous-Système moteur */
+/* Déterminer la distance entre deux points */
 
-tuple<arma::colvec, arma::colvec> sub_system_motor(arma::rowvec alpha){
-    /* Donneés */
-    double constant = 0.83;
-    double rho = 1.225;
-    arma::rowvec RPM = {10000, 20000, 15000, 17500};
-    double radius = (12.7/2)*1e-2;
-
-    /* TODO: ajouter le stabilisateur PID du sous-système moteur */
-    double F_x, F_y, F_z;
-    double M_x, M_y, M_z = 0;
-    arma::colvec x_m = {1, 0, 0};
-    arma::colvec y_m = {0, 1, 0};
-    arma::colvec z_m = {0, 0, 1};
-
-    double alpha_1 = alpha(0);
-    double alpha_2 = alpha(1);
-    double alpha_3 = alpha(2);
-    double alpha_4 = alpha(3);
-
-    arma::mat R_y_1 = rotation_matrix_motor(alpha_1);
-    arma::mat R_y_2 = rotation_matrix_motor(alpha_2);
-    arma::mat R_y_3 = rotation_matrix_motor(alpha_3);
-    arma::mat R_y_4 = rotation_matrix_motor(alpha_4);
-
-    arma::colvec z_r_1 = R_y_1 * z_m;
-    arma::colvec z_r_2 = R_y_2 * z_m;
-    arma::colvec z_r_3 = R_y_3 * z_m;
-    arma::colvec z_r_4 = R_y_4 * z_m;
-
-    /* Expression des forces de Poids du sous-stème moteur */
-    double m_sys = 0.1;
-    double m_mot = 0.037;
-    arma::colvec P_m = weigth_force(m_sys, -z_m);
-    arma::colvec P = weigth_force(m_mot, -z_m);
-
-    /* Expression des forces de poussée du sous-système moteur */
-    arma::colvec F_prop_1 = prop_force(constant, rho, RPM(0), radius, z_r_1);
-    arma::colvec F_prop_2 = prop_force(constant, rho, RPM(1), radius, z_r_2);
-    arma::colvec F_prop_3 = prop_force(constant, rho, RPM(2), radius, z_r_3);
-    arma::colvec F_prop_4 = prop_force(constant, rho, RPM(3), radius, z_r_4);
-
-    /* Equation des forces */
-    F_x = 4*P_m(0) + 4*P(0) + F_prop_1(0) + F_prop_2(0) + F_prop_3(0) + F_prop_4(0); 
-    F_y = 4*P_m(1) + 4*P(1) + F_prop_1(1) + F_prop_2(1) + F_prop_3(1) + F_prop_4(1); 
-    F_z = 4*P_m(2) + 4*P(2) + F_prop_1(2) + F_prop_2(2) + F_prop_3(2) + F_prop_4(2); 
-
-    arma::colvec F_mot = {F_x, F_y, F_z};
-    arma::colvec M_mot = {M_x, M_y, M_z};
+arma::colvec distance(arma::colvec a, arma::colvec b){
     
-    return make_tuple(F_mot, M_mot);
+    /*Vecteur AB = x_i_{B} - x_i_{A} */
+
+    arma::colvec d = b - a;
+    return  d;
+
+}
+
+arma::colvec moment_translation(arma::colvec Force, arma::colvec distance, arma::colvec Moment){
+    /* Théorème du moment */
+    arma::colvec new_moment = Moment + arma::cross(distance, Force);
+    return new_moment;
+}
+
+/* Sous-Système moteur */
+arma::mat sub_system_motor(double alpha, double RPM, arma::rowvec motor_position, arma::rowvec struct_position, arma::rowvec sys_position, arma::colvec gravity_center_position){
+    /* Données du systèmes moteurs */
+
+    double system_mass = 0.1;
+    double motor_mass = 37*1e-3;
+    double blade_const = 0.83;
+
+    double Fx, Fy, Fz;
+    double Mx, My, Mz;
+
+    /* Appel de la matrice de rotation du moteur */
+    arma::mat R = rotation_matrix_motor(alpha);
+    arma::mat R_inv = arma::inv(R);
+
+    /* Vecteur z_r et x_r */
+    arma::colvec x_r = R_inv * x_m;
+    arma::colvec z_r = R_inv * z_m;
+
+    /* Forces appliquées sur le système */
+    arma::colvec P_S = weigth_force(system_mass, -1 * z_m);
+    arma::colvec P_M = weigth_force(motor_mass, -1 * z_m);
+    arma::colvec F_prop = prop_force(blade_const, rho, RPM, radius, z_r);
+
+    /* Expression des projections des forces */
+    Fx = P_S(0) + P_M(0) + F_prop(0);
+    Fy = P_S(1) + P_M(1) + F_prop(1);
+    Fz = P_S(2) + P_M(2) + F_prop(2);
+
+    /* Moments appliquées sur le système */
+
+    arma::colvec position_motor = {motor_position(0), motor_position(1), motor_position(2)};
+    arma::colvec position_sys = {sys_position(0), sys_position(1), sys_position(2)};
+    arma::colvec position_struct = {struct_position(0), struct_position(1), struct_position(2)};
+
+    /* Expression des moments au centre de gravité de la structure moteur [SM] */
+    arma::colvec distance_motor_system = distance(position_motor, position_sys);
+    arma::colvec distance_struct_system = distance(position_struct, position_sys);
+
+    arma::colvec M_P_M = moment_translation(P_M, distance_motor_system, zeros);
+    arma::colvec M_F_prop = moment_translation(F_prop, distance_motor_system, zeros);
+    arma::colvec M_P_S = moment_translation(P_S, distance_struct_system, zeros);
+
+    /* Expression des moments au centre de gravité du dirigeable [G] */
+    arma::colvec distance_system_dirigible = distance(position_sys, gravity_center_position);
+
+    arma::colvec M_P_M_G = moment_translation(P_M, distance_system_dirigible, M_P_M);
+    arma::colvec M_F_prop_G = moment_translation(F_prop, distance_system_dirigible, M_F_prop);
+    arma::colvec M_P_S_G = moment_translation(P_S, distance_system_dirigible, M_P_S);
+
+    /* Expression des projections des moments */
+    Mx = M_P_M_G(0) + M_F_prop_G(0) + M_P_S_G(0);
+    My = M_P_M_G(1) + M_F_prop_G(1) + M_P_S_G(1);
+    Mz = M_P_M_G(2) + M_F_prop_G(2) + M_P_S_G(2);
+
+    arma::mat M_mot_in_G = {{Fx, Mx},
+                            {Fy, My},
+                            {Fz, Mz}};
+
+   return M_mot_in_G;
+
 }
 
 /* Sous-Système grappin */
@@ -200,22 +237,9 @@ tuple<arma::colvec, arma::colvec> sub_system_motor(arma::rowvec alpha){
 
 int main() {
     /* Données */
-    double radius = (12.7/2)*1e-2; // [m]
-    double rho = 1.225; // [kg/m^3]
-    double area = pi * radius * radius;
-    double M_struct = 3;
-    double V_tot = 7.0;
     int RPM = 20000;
-
-    /* Déclaration des vecteurs dans la base mobile */
-    arma::colvec x_m = {1, 0, 0};
-    arma::colvec y_m = {0, 1, 0};
-    arma::colvec z_m = {0, 0, 1};
-
-    /* Déclaration des vecteurs dans la base fixe */
-    arma::colvec x_0 = {1, 0, 0};
-    arma::colvec y_0 = {0, 1, 0};
-    arma::colvec z_0 = {0, 0, 1};
+    arma::colvec motor_angle = {pi/4, pi/4, pi/4, pi/4}; // Valeur à entrer grâce à la télécommande
+    arma::colvec motor_RPM = {10000, 15000, 20000, 17500}; // Valeur à entrer grâce à la télécommande
 
     /* Matrice de rotation */
     double phi = pi;
@@ -233,23 +257,73 @@ int main() {
     double new_y_position = moved_gravity_center(mass, y_position);
     double new_z_position = moved_gravity_center(mass, z_position);
 
-    /* Expression des forces appliquées sur la structure */
-    arma::colvec F_b = buoyancy_force(rho, V_tot, z_m);
-    cout << "Poussée d'Archimède (flotabilité), F_b : " << endl << F_b << endl; 
+    arma::colvec G = {new_x_position, new_y_position, new_z_position};
 
     /* Etude des blocs moteurs */
     double v_rotor = rotor_speed(radius, RPM);
     double m_dot = mass_flow(rho, area, v_rotor); // juste pour vérif la fonctionnalité
     double v_cruise = cruise_speed(area, rho, M_struct); 
 
-    cout << "Voici la nouvelle position x du centre de gravité : " << new_x_position << endl;
+    cout << "Voici la nouvelle position  du centre de gravité : " << endl;
+    cout << G << endl;
     cout << "La vitesse du rotor est : " << v_rotor << " m/s." << endl;
     cout << "Débit massique : " << m_dot << " kg/s." << endl;
     cout << "Vitesse rotor de croisière (compensation Poids Poussée) : " << v_cruise << " m/s, soit " << v_cruise * 3.6 << " km/h." <<endl;
 
-    arma::rowvec alpha = {pi/4, pi/4, -pi/4, -pi/4};
-    auto [F_mot, M_mot] = sub_system_motor(alpha);
-    cout << F_mot << endl;
+    /* Etude dirigeable à vide */
+    arma::colvec B = {2.41, 0, 0.5}; // centre de flotabilité
+    arma::colvec b2g = distance(B, G);
+
+    arma::colvec F_b = buoyancy_force(rho, V_tot, z_m);
+    arma::colvec P = weigth_force(M_struct, -1 * z_m);
+    arma::colvec F_b_g = moment_translation(F_b, b2g, zeros);
+
+    arma::mat Dirigible_Torsor = {{F_b(0) + P(0), F_b_g(0)},
+                                  {F_b(1) + P(1), F_b_g(1)},
+                                  {F_b(2) + P(2), F_b_g(2)}};
+
+    cout << "\nTorseur du dirigeable à vide :\n" << endl;
+    cout << Dirigible_Torsor << endl;
+
+    /* Etude des systèmes-blocs moteur */
+
+    arma::mat Motor_Torsor = {{0, 0},
+                              {0, 0},
+                              {0, 0}};
+
+                        /* Positionnement dans l'espace */
+
+    /* Position du centre de gravité du systèmes blocs-moteurs */
+    arma::mat G_SM = {{0.46, 1, 0.5}, 
+                      {0.46, -1, 0.5}, 
+                      {-1.54, -1, 0.5}, 
+                      {-1.54, 1, 0.5}};
+
+    /* Position du centre de gravité de la structure des moteurs */
+    arma::mat G_S = {{0.46, 1.05, 0},
+                     {0.46, -1.05, 0},
+                     {-1.54, -1.05, 0},
+                     {-1.54, 1.05, 0}};
+
+    /* Position des moteurs */
+    arma::mat Ri = {{0.46, 1.5, 0}, 
+                    {0.46, -1.5, 0}, 
+                    {-1.54, -1.5, 0}, 
+                    {-1.54, 1.5, 0}};
+
+
+    for (int i=0; i<4; i++) {
+            Motor_Torsor += sub_system_motor(motor_angle(i), motor_RPM(i), Ri.row(i), G_S.row(i), G_SM.row(i), G);
+    }
+
+    cout << "\n Torseur des actions extérieurs associées aux 4 systèmes moteurs exprimé en G\n" << endl; 
+    cout << Motor_Torsor << endl;
+
+    /* Expression du torseur des efforts intérieurs associés à la structure */
+
+    arma::mat Torsor = Dirigible_Torsor + Motor_Torsor;
+    cout << "Torseur des efforts extérieurs total :" << endl;
+    cout << Torsor << endl;
 
     return 0;
 }
