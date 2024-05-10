@@ -56,7 +56,7 @@ classdef Moteur
 
         end
 
-        function interp_thrust(obj, a, b)
+        function interp_thrust(obj, a, b, cnd)
 
             rho = obj.Data("rho");
             diameter = obj.Data("diameter");
@@ -77,10 +77,18 @@ classdef Moteur
             plot(RPM, T, "b", 'LineWidth', 2)
             plot(RPM_interp_1, T_1, 'k*', "LineWidth", 1)
             plot(RPM_interp_2, T_2, 'ro', "LineWidth", 1)
+            
+            if cnd(1) == 0
+                legend("RPM", "RPM(u) = a*u","RPM(u) = a*u + b", 'Location', 'southeast')
+            else
+                plot(cnd(2), cnd(3), 'g*', 'MarkerSize', 10, 'LineWidth', 2)
+                last_legend = "RPM = " + cnd(2) + ", T = " + cnd(3);
+                legend("RPM", "RPM(u) = a*u","RPM(u) = a*u + b", last_legend , 'Location', 'southeast')
+            end
+
             xlabel("RPM")
             ylabel("Thrust [N]")
             title("Poussée d'un moteur en fonction des RPMs")
-            legend("RPM", "RPM(u) = a*u","RPM(u) = a*u + b", 'Location', 'southeast')
             grid on;
             hold off;
         end
@@ -92,7 +100,7 @@ classdef Moteur
                    [-sin(alpha), 0, cos(alpha)]];
         end
 
-        function [F_prop, M_prop] = Force_Moment(obj, value_interp)
+        function [F_prop, M_prop, RPM] = Force_Moment(obj, value_interp)
             R_y = obj.rotation_G_M();
             z_r = R_y * obj.Axes_m("z_m");
 
