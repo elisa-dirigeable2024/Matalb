@@ -92,22 +92,23 @@ classdef Moteur
                    [-sin(alpha), 0, cos(alpha)]];
         end
 
-        function [F_prop, M_prop] = Force_Moment(obj, value)
+        function [F_prop, M_prop] = Force_Moment(obj, value_interp)
             R_y = obj.rotation_G_M();
             z_r = R_y * obj.Axes_m("z_m");
+
+            puissance = value_interp("puissance");
+            a = value_interp('a');
+            b = value_interp('b');
+            u = value_interp('voltage');
         
-            power = value('power');
-            a = value('a');
-            b = value('b');
-            u = value('voltage');
-        
-            if power <= 50
+            if puissance <= 50
                 RPM = a * u;
             else
                 RPM = a * u + b;
             end
         
-            norm_T = value('Ct') * obj.Data('rho') * (RPM / 60)^2 * obj.Data('diameter');
+            norm_T = value_interp('Ct') * obj.Data('rho') * (RPM / 60)^2 * obj.Data('diameter')^4;
+
             F_prop = norm_T * z_r;
             M_prop = [0; 0; 0];
         end
