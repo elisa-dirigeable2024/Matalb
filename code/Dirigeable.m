@@ -25,7 +25,7 @@ classdef Dirigeable
 
         function plot(obj)
 
-            %% ----------------------------------%%
+            %% ---------------------------------- %%
 
             % avant
             vertices_1 = [
@@ -69,95 +69,146 @@ classdef Dirigeable
                 -1.8 -0.7 0.10;
                 -2.2 -0.7 0.10];
 
-            %% ----------------------------------%%
+            %% ---------------------------------- %%
 
             % avant
-            vertices_T1 = [
-                2.02 0.7 -0.02; 
-                1.98 0.7 -0.02;
-                1.98 0.7 0.02;
-                2.02 0.7 0.02;
-                2.02 0.9 -0.02;
-                1.98 0.9 -0.02;
-                1.98 0.9 0.02;
-                2.02 0.9 0.02];
+            x_T_1 = 2.02;
+            x_T_2 = 1.98;
+            y_T_1 = 0.7;
+            y_T_2 = 0.9;
+            z_T = 0.02;
 
-            vertices_T2 = [
-                2.02 -0.7 -0.02; 
-                1.98 -0.7 -0.02;
-                1.98 -0.7 0.02;
-                2.02 -0.7 0.02;
-                2.02 -0.9 -0.02;
-                1.98 -0.9 -0.02;
-                1.98 -0.9 0.02;
-                2.02 -0.9 0.02];
+            vertices_T1 = [
+                x_T_1 y_T_1 -z_T; 
+                x_T_2 y_T_1 -z_T;
+                x_T_2 y_T_1  z_T;
+                x_T_1 y_T_1  z_T;
+                x_T_1 y_T_2 -z_T;
+                x_T_2 y_T_2 -z_T;
+                x_T_2 y_T_2  z_T;
+                x_T_1 y_T_2  z_T];
+
+            % Utilisation des variables pour vertices_T2
+           vertices_T2 = [
+                x_T_1 -y_T_1 -z_T; 
+                x_T_2 -y_T_1 -z_T;
+                x_T_2 -y_T_1 z_T;
+                x_T_1 -y_T_1 z_T;
+                x_T_1 -y_T_2 -z_T;
+                x_T_2 -y_T_2 -z_T;
+                x_T_2 -y_T_2 z_T;
+                x_T_1 -y_T_2 z_T];
 
             % arrière
             vertices_T3 = [
-                -2.02 0.7 -0.02; 
-                -1.98 0.7 -0.02;
-                -1.98 0.7 0.02;
-                -2.02 0.7 0.02;
-                -2.02 0.9 -0.02;
-                -1.98 0.9 -0.02;
-                -1.98 0.9 0.02;
-                -2.02 0.9 0.02];
+                -x_T_1 y_T_1 -z_T; 
+                -x_T_2 y_T_1 -z_T;
+                -x_T_2 y_T_1  z_T;
+                -x_T_1 y_T_1  z_T;
+                -x_T_1 y_T_2 -z_T;
+                -x_T_2 y_T_2 -z_T;
+                -x_T_2 y_T_2  z_T;
+                -x_T_1 y_T_2  z_T];
 
             vertices_T4 = [
-                -2.02 -0.7 -0.02; 
-                -1.98 -0.7 -0.02;
-                -1.98 -0.7 0.02;
-                -2.02 -0.7 0.02;
-                -2.02 -0.9 -0.02;
-                -1.98 -0.9 -0.02;
-                -1.98 -0.9 0.02;
-                -2.02 -0.9 0.02];
+                -x_T_1 -y_T_1 -z_T; 
+                -x_T_2 -y_T_1 -z_T;
+                -x_T_2 -y_T_1 z_T;
+                -x_T_1 -y_T_1 z_T;
+                -x_T_1 -y_T_2 -z_T;
+                -x_T_2 -y_T_2 -z_T;
+                -x_T_2 -y_T_2 z_T;
+                -x_T_1 -y_T_2 z_T];
 
-            %% ----------------------------------%%
+            %% ---------------------------------- %%
+
+            x_mot_1 = 2.1;
+            x_mot_2 = 1.9;
+            y_mot_1 = 0.9;
+            y_mot_2 = 1.1;
+            z_mot = 0.05;
 
             % avant
             vertices_mot_1 =[
-                2.1 0.9 -0.05; 
-                1.9 0.9 -0.05;
-                1.9 0.9 0.05;
-                2.1 0.9 0.05;
-                2.1 1.1 -0.05;
-                1.9 1.1 -0.05;
-                1.9 1.1 0.05;
-                2.1 1.1 0.05];
+                x_mot_1 y_mot_1 -z_mot; 
+                x_mot_2 y_mot_1 -z_mot;
+                x_mot_2 y_mot_1 z_mot;
+                x_mot_1 y_mot_1 z_mot;
+                x_mot_1 y_mot_2 -z_mot;
+                x_mot_2 y_mot_2 -z_mot;
+                x_mot_2 y_mot_2 z_mot;
+                x_mot_1 y_mot_2 z_mot
+                ];
 
             vertices_mot_2 =[
-                2.1 -0.9 -0.05; 
-                1.9 -0.9 -0.05;
-                1.9 -0.9 0.05;
-                2.1 -0.9 0.05;
-                2.1 -1.1 -0.05;
-                1.9 -1.1 -0.05;
-                1.9 -1.1 0.05;
-                2.1 -1.1 0.05];
+                x_mot_1 -y_mot_1 -z_mot; 
+                x_mot_2 -y_mot_1 -z_mot;
+                x_mot_2 -y_mot_1 z_mot;
+                x_mot_1 -y_mot_1 z_mot;
+                x_mot_1 -y_mot_2 -z_mot;
+                x_mot_2 -y_mot_2 -z_mot;
+                x_mot_2 -y_mot_2 z_mot;
+                x_mot_1 -y_mot_2 z_mot
+                ];
 
             % arrière
-            vertices_mot_3 =[
-                -2.1 0.9 -0.05; 
-                -1.9 0.9 -0.05;
-                -1.9 0.9 0.05;
-                -2.1 0.9 0.05;
-                -2.1 1.1 -0.05;
-                -1.9 1.1 -0.05
-                -1.9 1.1 0.05;
-                -2.1 1.1 0.05];
+            vertices_mot_3 = [
+                -x_mot_1 y_mot_1 -z_mot; 
+                -x_mot_2 y_mot_1 -z_mot;
+                -x_mot_2 y_mot_1 z_mot;
+                -x_mot_1 y_mot_1 z_mot;
+                -x_mot_1 y_mot_2 -z_mot;
+                -x_mot_2 y_mot_2 -z_mot;
+                -x_mot_2 y_mot_2 z_mot;
+                -x_mot_1 y_mot_2 z_mot
+                ];
 
-            vertices_mot_4 =[
-                -2.1 -0.9 -0.05; 
-                -1.9 -0.9 -0.05;
-                -1.9 -0.9 0.05;
-                -2.1 -0.9 0.05;
-                -2.1 -1.1 -0.05;
-                -1.9 -1.1 -0.05;
-                -1.9 -1.1 0.05;
-                -2.1 -1.1 0.05];
+            vertices_mot_4 = [
+                -x_mot_1 -y_mot_1 -z_mot; 
+                -x_mot_2 -y_mot_1 -z_mot;
+                -x_mot_2 -y_mot_1 z_mot;
+                -x_mot_1 -y_mot_1 z_mot;
+                -x_mot_1 -y_mot_2 -z_mot;
+                -x_mot_2 -y_mot_2 -z_mot;
+                -x_mot_2 -y_mot_2 z_mot;
+                -x_mot_1 -y_mot_2 z_mot
+                ];
 
-            %% ----------------------------------%%
+            %% ---------------------------------- %%
+            x_nac = 0.25;
+            y_nac = 0.15;
+            z_nac_1 = -0.7;
+            z_nac_2 = -0.9;
+
+            vertices_nacelle = [
+                -x_nac -y_nac z_nac_1;
+                 x_nac -y_nac z_nac_1;
+                 x_nac y_nac z_nac_1;
+                -x_nac y_nac z_nac_1;
+                -x_nac -y_nac z_nac_2;
+                 x_nac -y_nac z_nac_2;
+                 x_nac y_nac z_nac_2;
+                -x_nac y_nac z_nac_2;
+                ];
+            
+            x_grap_1 = 1.4;
+            x_grap_2 = 1.6;
+            y_grap = 0.20;
+            z_grap_1 = -0.6;
+            z_grap_2 = -0.8;
+
+            vertices_grappin = [
+                 x_grap_1 -y_grap z_grap_1;
+                 x_grap_2 -y_grap z_grap_1;
+                 x_grap_2 y_grap z_grap_1;
+                 x_grap_1 y_grap z_grap_1;
+                 x_grap_1 -y_grap z_grap_2;
+                 x_grap_2 -y_grap z_grap_2;
+                 x_grap_2 y_grap z_grap_2;
+                 x_grap_1 y_grap z_grap_2;
+                ];
+
+            %% ---------------------------------- %%
 
             % Indices des faces du cube
             faces = [1 2 3 4; % Bas
@@ -167,6 +218,7 @@ classdef Dirigeable
                      3 4 8 7;
                      4 1 5 8];
 
+            %% ---------------------------------- %%
             
             % Dessiner le cube
             figure;
@@ -176,7 +228,7 @@ classdef Dirigeable
             xlabel('X');
             ylabel('Y');
             zlabel('Z');
-            title('Dirigeable');
+            title('Visualisation des forces du dirigeable');
             
             % CAO structure moteur
             patch('Vertices', vertices_1, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
@@ -195,6 +247,54 @@ classdef Dirigeable
             patch('Vertices', vertices_mot_2, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
             patch('Vertices', vertices_mot_3, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
             patch('Vertices', vertices_mot_4, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
+
+            % nacelle
+            patch('Vertices', vertices_nacelle, 'Faces', faces, 'FaceColor', 'c', 'FaceAlpha', 0.5);
+
+            % grappin
+            patch('Vertices', vertices_grappin, 'Faces', faces, 'FaceColor', 'm', 'FaceAlpha', 0.5);
+            
+            %% ---------------------------------- %%
+            
+            % repère
+            scale = 1;
+            quiver3(0,0,0, scale, 0, 0, 'k', 'LineWidth',2)
+            quiver3(0,0,0, 0, scale, 0, 'k', 'LineWidth',2)
+            quiver3(0,0,0, 0, 0, scale, 'k', 'LineWidth',2)
+
+            % thrust
+            x_t = (x_mot_1 + x_mot_2)/2;
+            y_t = (y_mot_1 + y_mot_2)/2;
+            quiver3(x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            quiver3(-x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            quiver3(-x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            quiver3(x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+
+            % weight
+                % structure moteur
+            navy = [0, 0, 0.5];
+            x_p_sm = (x_T_1 + x_T_2)/2;
+            y_p_sm = (y_T_1 + y_T_2)/2;
+            quiver3(x_p_sm, y_p_sm, -z_T, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+            quiver3(-x_p_sm, y_p_sm, -z_T, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+            quiver3(-x_p_sm, -y_p_sm, -z_T, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+            quiver3(x_p_sm, -y_p_sm, -z_T, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+
+                % nacelle
+            quiver3(0, 0, z_nac_2, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+                
+                % grappin
+            x_grap = (x_grap_1 + x_grap_2)/2;
+            quiver3(x_grap, 0, z_grap_2, 0, 0, -scale/2, 'Color', navy, 'LineWidth', 1.5)
+            
+            % centre de gravité à vide
+            G = [6*0.41, 0, 0];
+            quiver3(3-G(1), 0, 0, 0, 0, -scale, 'Color', [0.5, 0, 0.5], 'LineWidth', 1.5)
+            plot3(3-G(1), 0, 0, 'o', 'MarkerSize', 4, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', [0.5, 0, 0.5]);
+            text(3-G(1), 0, 0.05, 'G', 'FontSize', 12, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+
+            %% ---------------------------------- %%
 
             % Définir les axes pour l'ellipsoïde
             a = 3;  % Rayon le long de l'axe x
@@ -217,6 +317,8 @@ classdef Dirigeable
             
             % Ajustements visuels
             view(3);  % Vue 3D
+
+            hold off;
 
         end
         
