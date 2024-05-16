@@ -3,12 +3,16 @@ classdef Dirigeable
     properties
         Data
         Axes
+        Angle
+        Box_Containers
     end
     
     methods
-        function obj = Dirigeable(data, axes)
+        function obj = Dirigeable(data, axes, angle, box_containers)
             obj.Data = data;
             obj.Axes = axes;
+            obj.Angle = angle;
+            obj.Box_Containers = box_containers;
         end
         
         function W = weight(obj)
@@ -26,57 +30,69 @@ classdef Dirigeable
         function plot(obj)
 
             %% ---------------------------------- %%
+            x_box_1 = obj.Box_Containers("x_box_1");
+            x_box_2 = obj.Box_Containers("x_box_2");
+            y_box_1 = obj.Box_Containers("y_box_1");
+            y_box_2 = obj.Box_Containers("y_box_2");
+            z_box = obj.Box_Containers("z_box");
 
             % avant
             vertices_1 = [
-                2.2 0.5 -0.10; 
-                1.8 0.5 -0.10;
-                1.8 0.5 0.10;
-                2.2 0.5 0.10;
-                2.2 0.7 -0.10;
-                1.8 0.7 -0.10;
-                1.8 0.7 0.10;
-                2.2 0.7 0.10];
+                x_box_1 y_box_1 -z_box; 
+                x_box_2 y_box_1 -z_box;
+                x_box_2 y_box_1 z_box;
+                x_box_1 y_box_1 z_box;
+                x_box_1 y_box_2 -z_box;
+                x_box_2 y_box_2 -z_box;
+                x_box_2 y_box_2 z_box;
+                x_box_1 y_box_2 z_box];
 
             vertices_2 = [
-                2.2 -0.5 -0.10; 
-                1.8 -0.5 -0.10;
-                1.8 -0.5 0.10;
-                2.2 -0.5 0.10;
-                2.2 -0.7 -0.10;
-                1.8 -0.7 -0.10;
-                1.8 -0.7 0.10;
-                2.2 -0.7 0.10];
+                x_box_1 -y_box_1 -z_box; 
+                x_box_2 -y_box_1 -z_box;
+                x_box_2 -y_box_1 z_box;
+                x_box_1 -y_box_1 z_box;
+                x_box_1 -y_box_2 -z_box;
+                x_box_2 -y_box_2 -z_box;
+                x_box_2 -y_box_2 z_box;
+                x_box_1 -y_box_2 z_box];
             
             % arrière
             vertices_3 = [
-                -2.2 0.5 -0.10; 
-                -1.8 0.5 -0.10;
-                -1.8 0.5 0.10;
-                -2.2 0.5 0.10;
-                -2.2 0.7 -0.10;
-                -1.8 0.7 -0.10;
-                -1.8 0.7 0.10;
-                -2.2 0.7 0.10];
+                -x_box_1 y_box_1 -z_box; 
+                -x_box_2 y_box_1 -z_box;
+                -x_box_2 y_box_1 z_box;
+                -x_box_1 y_box_1 z_box;
+                -x_box_1 y_box_2 -z_box;
+                -x_box_2 y_box_2 -z_box;
+                -x_box_2 y_box_2 z_box;
+                -x_box_1 y_box_2 z_box];
 
             vertices_4 = [
-                -2.2 -0.5 -0.10; 
-                -1.8 -0.5 -0.10;
-                -1.8 -0.5 0.10;
-                -2.2 -0.5 0.10;
-                -2.2 -0.7 -0.10;
-                -1.8 -0.7 -0.10;
-                -1.8 -0.7 0.10;
-                -2.2 -0.7 0.10];
+                -x_box_1 -y_box_1 -z_box; 
+                -x_box_2 -y_box_1 -z_box;
+                -x_box_2 -y_box_1 z_box;
+                -x_box_1 -y_box_1 z_box;
+                -x_box_1 -y_box_2 -z_box;
+                -x_box_2 -y_box_2 -z_box;
+                -x_box_2 -y_box_2 z_box;
+                -x_box_1 -y_box_2 z_box];
 
             %% ---------------------------------- %%
+            x_T_1 = x_box_1 - 0.18;
+            x_T_2 = x_box_2 + 0.18;
+            y_T_1 = y_box_1 + 0.2;
+            y_T_2 = y_box_2 + 0.2;
+            z_T = z_box - 0.08;
+            
+            % box_values = [2.2, 1.8, 0.5, 0.7, 0.1];
 
             % avant
-            x_T_1 = 2.02;
-            x_T_2 = 1.98;
-            y_T_1 = 0.7;
-            y_T_2 = 0.9;
-            z_T = 0.02;
+            % x_T_1 = 2.02;
+            % x_T_2 = 1.98;
+            % y_T_1 = 0.7;
+            % y_T_2 = 0.9;
+            % z_T = 0.02;
 
             vertices_T1 = [
                 x_T_1 y_T_1 -z_T; 
@@ -122,11 +138,14 @@ classdef Dirigeable
 
             %% ---------------------------------- %%
 
-            x_mot_1 = 2.1;
-            x_mot_2 = 1.9;
-            y_mot_1 = 0.9;
-            y_mot_2 = 1.1;
-            z_mot = 0.05;
+            x_mot_1 = x_box_1 - 0.1;
+            x_mot_2 = x_box_2 + 0.1;
+            y_mot_1 = y_box_1 + 0.4;
+            y_mot_2 = y_box_2 + 0.4;
+            z_mot = z_box / 2;
+
+            test_vertices_mot = [
+                ];
 
             % avant
             vertices_mot_1 =[
