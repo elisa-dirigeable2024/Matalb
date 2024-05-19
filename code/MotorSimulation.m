@@ -7,7 +7,7 @@ classdef MotorSimulation
         Axes;
         InterpCoeff;
         Voltage;
-    end
+    end 
     
     methods
         function obj = MotorSimulation(motorname, coeff, angle, data_axes, voltage_value)

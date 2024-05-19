@@ -4,15 +4,21 @@ classdef Dirigeable
         Data
         Axes
         Angle
-        Box_Containers
+
+        PivotMot
+        Theta
+        SimuContainers
     end
     
     methods
-        function obj = Dirigeable(data, axes, angle, box_containers)
+        function obj = Dirigeable(data, axes, angle, simu_containers, pivot_mot, theta)
             obj.Data = data;
             obj.Axes = axes;
             obj.Angle = angle;
-            obj.Box_Containers = box_containers;
+            obj.SimuContainers = simu_containers;
+
+            obj.PivotMot = pivot_mot;
+            obj.Theta = theta;
         end
         
         function W = weight(obj)
@@ -29,169 +35,122 @@ classdef Dirigeable
 
         function plot(obj)
 
-            %% ---------------------------------- %%
-            x_box_1 = obj.Box_Containers("x_box_1");
-            x_box_2 = obj.Box_Containers("x_box_2");
-            y_box_1 = obj.Box_Containers("y_box_1");
-            y_box_2 = obj.Box_Containers("y_box_2");
-            z_box = obj.Box_Containers("z_box");
-
-            % avant
-            vertices_1 = [
-                x_box_1 y_box_1 -z_box; 
-                x_box_2 y_box_1 -z_box;
-                x_box_2 y_box_1 z_box;
-                x_box_1 y_box_1 z_box;
-                x_box_1 y_box_2 -z_box;
-                x_box_2 y_box_2 -z_box;
-                x_box_2 y_box_2 z_box;
-                x_box_1 y_box_2 z_box];
-
-            vertices_2 = [
-                x_box_1 -y_box_1 -z_box; 
-                x_box_2 -y_box_1 -z_box;
-                x_box_2 -y_box_1 z_box;
-                x_box_1 -y_box_1 z_box;
-                x_box_1 -y_box_2 -z_box;
-                x_box_2 -y_box_2 -z_box;
-                x_box_2 -y_box_2 z_box;
-                x_box_1 -y_box_2 z_box];
+            % Dessiner le cube
+            figure;
+            hold on;
+            axis equal;
+            grid on;
+            xlabel('X');
+            ylabel('Y');
+            zlabel('Z');
+            title('Visualisation des forces du dirigeable');
             
-            % arrière
-            vertices_3 = [
-                -x_box_1 y_box_1 -z_box; 
-                -x_box_2 y_box_1 -z_box;
-                -x_box_2 y_box_1 z_box;
-                -x_box_1 y_box_1 z_box;
-                -x_box_1 y_box_2 -z_box;
-                -x_box_2 y_box_2 -z_box;
-                -x_box_2 y_box_2 z_box;
-                -x_box_1 y_box_2 z_box];
-
-            vertices_4 = [
-                -x_box_1 -y_box_1 -z_box; 
-                -x_box_2 -y_box_1 -z_box;
-                -x_box_2 -y_box_1 z_box;
-                -x_box_1 -y_box_1 z_box;
-                -x_box_1 -y_box_2 -z_box;
-                -x_box_2 -y_box_2 -z_box;
-                -x_box_2 -y_box_2 z_box;
-                -x_box_1 -y_box_2 z_box];
-
-            %% ---------------------------------- %%
-            x_T_1 = x_box_1 - 0.18;
-            x_T_2 = x_box_2 + 0.18;
-            y_T_1 = y_box_1 + 0.2;
-            y_T_2 = y_box_2 + 0.2;
-            z_T = z_box - 0.08;
-            
-            % box_values = [2.2, 1.8, 0.5, 0.7, 0.1];
-
-            % avant
-            % x_T_1 = 2.02;
-            % x_T_2 = 1.98;
-            % y_T_1 = 0.7;
-            % y_T_2 = 0.9;
-            % z_T = 0.02;
-
-            vertices_T1 = [
-                x_T_1 y_T_1 -z_T; 
-                x_T_2 y_T_1 -z_T;
-                x_T_2 y_T_1  z_T;
-                x_T_1 y_T_1  z_T;
-                x_T_1 y_T_2 -z_T;
-                x_T_2 y_T_2 -z_T;
-                x_T_2 y_T_2  z_T;
-                x_T_1 y_T_2  z_T];
-
-            % Utilisation des variables pour vertices_T2
-           vertices_T2 = [
-                x_T_1 -y_T_1 -z_T; 
-                x_T_2 -y_T_1 -z_T;
-                x_T_2 -y_T_1 z_T;
-                x_T_1 -y_T_1 z_T;
-                x_T_1 -y_T_2 -z_T;
-                x_T_2 -y_T_2 -z_T;
-                x_T_2 -y_T_2 z_T;
-                x_T_1 -y_T_2 z_T];
-
-            % arrière
-            vertices_T3 = [
-                -x_T_1 y_T_1 -z_T; 
-                -x_T_2 y_T_1 -z_T;
-                -x_T_2 y_T_1  z_T;
-                -x_T_1 y_T_1  z_T;
-                -x_T_1 y_T_2 -z_T;
-                -x_T_2 y_T_2 -z_T;
-                -x_T_2 y_T_2  z_T;
-                -x_T_1 y_T_2  z_T];
-
-            vertices_T4 = [
-                -x_T_1 -y_T_1 -z_T; 
-                -x_T_2 -y_T_1 -z_T;
-                -x_T_2 -y_T_1 z_T;
-                -x_T_1 -y_T_1 z_T;
-                -x_T_1 -y_T_2 -z_T;
-                -x_T_2 -y_T_2 -z_T;
-                -x_T_2 -y_T_2 z_T;
-                -x_T_1 -y_T_2 z_T];
 
             %% ---------------------------------- %%
 
-            x_mot_1 = x_box_1 - 0.1;
-            x_mot_2 = x_box_2 + 0.1;
-            y_mot_1 = y_box_1 + 0.4;
-            y_mot_2 = y_box_2 + 0.4;
-            z_mot = z_box / 2;
+            % Indices des faces du cube
+            faces = [1 2 3 4; % Bas
+                     5 6 7 8; % Haut
+                     1 2 6 5; % Côtés
+                     2 3 7 6;
+                     3 4 8 7;
+                     4 1 5 8];
 
-            test_vertices_mot = [
-                ];
+            %% ---------------------------------- %%
 
-            % avant
-            vertices_mot_1 =[
-                x_mot_1 y_mot_1 -z_mot; 
-                x_mot_2 y_mot_1 -z_mot;
-                x_mot_2 y_mot_1 z_mot;
-                x_mot_1 y_mot_1 z_mot;
-                x_mot_1 y_mot_2 -z_mot;
-                x_mot_2 y_mot_2 -z_mot;
-                x_mot_2 y_mot_2 z_mot;
-                x_mot_1 y_mot_2 z_mot
-                ];
+            box_containers = obj.SimuContainers("box_containers");
+            x_box_1 = box_containers("x_box_1");
+            x_box_2 = box_containers("x_box_2");
+            y_box_1 = box_containers("y_box_1");
+            y_box_2 = box_containers("y_box_2");
+            z_box = box_containers("z_box");
 
-            vertices_mot_2 =[
-                x_mot_1 -y_mot_1 -z_mot; 
-                x_mot_2 -y_mot_1 -z_mot;
-                x_mot_2 -y_mot_1 z_mot;
-                x_mot_1 -y_mot_1 z_mot;
-                x_mot_1 -y_mot_2 -z_mot;
-                x_mot_2 -y_mot_2 -z_mot;
-                x_mot_2 -y_mot_2 z_mot;
-                x_mot_1 -y_mot_2 z_mot
-                ];
+            tube_containers = obj.SimuContainers("tube_containers");
+            x_T_1 = tube_containers("x_T_1");
+            x_T_2 = tube_containers("x_T_2");
+            y_T_1 = tube_containers("y_T_1");
+            y_T_2 = tube_containers("y_T_2");
+            z_T = tube_containers("z_T");
 
-            % arrière
-            vertices_mot_3 = [
-                -x_mot_1 y_mot_1 -z_mot; 
-                -x_mot_2 y_mot_1 -z_mot;
-                -x_mot_2 y_mot_1 z_mot;
-                -x_mot_1 y_mot_1 z_mot;
-                -x_mot_1 y_mot_2 -z_mot;
-                -x_mot_2 y_mot_2 -z_mot;
-                -x_mot_2 y_mot_2 z_mot;
-                -x_mot_1 y_mot_2 z_mot
-                ];
+            motor_containers = obj.SimuContainers("motor_containers");
+            x_mot_1 = motor_containers("x_mot_1");
+            x_mot_2 = motor_containers("x_mot_2");
+            y_mot_1 = motor_containers("y_mot_1");
+            y_mot_2 = motor_containers("y_mot_2");
+            z_mot = motor_containers("z_mot");
 
-            vertices_mot_4 = [
-                -x_mot_1 -y_mot_1 -z_mot; 
-                -x_mot_2 -y_mot_1 -z_mot;
-                -x_mot_2 -y_mot_1 z_mot;
-                -x_mot_1 -y_mot_1 z_mot;
-                -x_mot_1 -y_mot_2 -z_mot;
-                -x_mot_2 -y_mot_2 -z_mot;
-                -x_mot_2 -y_mot_2 z_mot;
-                -x_mot_1 -y_mot_2 z_mot
-                ];
+            %% Création des blocs avec une boucle for
+
+            for i = 1:4
+
+                if i == 1 || i == 2
+                    signe = 1;
+                elseif i ==3 || i == 4
+                    signe = -1;
+                end
+
+                % structure moteur - cao
+
+                vertices_box = [
+                    signe * x_box_1, (-1)^(i+1) * y_box_1, -z_box; 
+                    signe * x_box_2, (-1)^(i+1) * y_box_1, -z_box;
+                    signe * x_box_2, (-1)^(i+1) * y_box_1, z_box;
+                    signe * x_box_1, (-1)^(i+1) * y_box_1, z_box;
+                    signe * x_box_1, (-1)^(i+1) * y_box_2, -z_box;
+                    signe * x_box_2, (-1)^(i+1) * y_box_2, -z_box;
+                    signe * x_box_2, (-1)^(i+1) * y_box_2, z_box;
+                    signe * x_box_1, (-1)^(i+1) * y_box_2, z_box
+                    ];
+
+                patch('Vertices', vertices_box, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
+                
+                %% liaison structure moteur - cao / moteur
+
+                vertices_tube = [
+                    signe * x_T_1, (-1)^(i+1) * y_T_1, -z_T; 
+                    signe * x_T_2, (-1)^(i+1) * y_T_1, -z_T;
+                    signe * x_T_2, (-1)^(i+1) * y_T_1, z_T;
+                    signe * x_T_1, (-1)^(i+1) * y_T_1, z_T;
+                    signe * x_T_1, (-1)^(i+1) * y_T_2, -z_T;
+                    signe * x_T_2, (-1)^(i+1) * y_T_2, -z_T;
+                    signe * x_T_2, (-1)^(i+1) * y_T_2, z_T;
+                    signe * x_T_1, (-1)^(i+1) * y_T_2, z_T
+                    ];
+
+                patch('Vertices', vertices_tube, 'Faces', faces, 'FaceColor', 'b', 'FaceAlpha', 0.5);
+
+                %% motor
+
+                vertices_motor = [
+                    signe * x_mot_1, (-1)^(i+1) * y_mot_1, -z_mot;
+                    signe * x_mot_2, (-1)^(i+1) * y_mot_1, -z_mot;
+                    signe * x_mot_2, (-1)^(i+1) * y_mot_1, z_mot;
+                    signe * x_mot_1, (-1)^(i+1) * y_mot_1, z_mot;
+                    signe * x_mot_1, (-1)^(i+1) * y_mot_2, -z_mot;
+                    signe * x_mot_2, (-1)^(i+1) * y_mot_2, -z_mot;
+                    signe * x_mot_2, (-1)^(i+1) * y_mot_2, z_mot;
+                    signe * x_mot_1, (-1)^(i+1) * y_mot_2, z_mot;
+                    ];
+
+                c = cos(obj.Theta(i));
+                s = sin(obj.Theta(i));
+
+                Rot_y = [
+                    [c 0 s];
+                    [0 1 0];
+                    [-s 0 c];
+                    ];
+                
+                % vecteur : 
+                scale = 1;
+                x_t = (signe * x_mot_1 + signe * x_mot_2)/2;
+                y_t = ((-1)^(i+1) * y_mot_1 + (-1)^(i+1) * y_mot_2)/2;
+                z_t = (z_mot - z_mot)/2;
+                quiver3(x_t, y_t, z_t, -(scale/2) * s, 0, (scale/2) * c, 'Color', [1, 0.5, 0], 'LineWidth', 2)
+
+                vectices_motor = (Rot_y.' * (vertices_motor - obj.PivotMot(i, :)).' + obj.PivotMot(i, :).').';
+                patch('Vertices', vectices_motor, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
+            end
 
             %% ---------------------------------- %%
             x_nac = 0.25;
@@ -227,46 +186,6 @@ classdef Dirigeable
                  x_grap_1 y_grap z_grap_2;
                 ];
 
-            %% ---------------------------------- %%
-
-            % Indices des faces du cube
-            faces = [1 2 3 4; % Bas
-                     5 6 7 8; % Haut
-                     1 2 6 5; % Côtés
-                     2 3 7 6;
-                     3 4 8 7;
-                     4 1 5 8];
-
-            %% ---------------------------------- %%
-            
-            % Dessiner le cube
-            figure;
-            hold on;
-            axis equal;
-            grid on;
-            xlabel('X');
-            ylabel('Y');
-            zlabel('Z');
-            title('Visualisation des forces du dirigeable');
-            
-            % CAO structure moteur
-            patch('Vertices', vertices_1, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_2, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_3, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_4, 'Faces', faces, 'FaceColor', 'r', 'FaceAlpha', 0.5);
-            
-            % CAO tube moteur
-            patch('Vertices', vertices_T1, 'Faces', faces, 'FaceColor', 'b', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_T2, 'Faces', faces, 'FaceColor', 'b', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_T3, 'Faces', faces, 'FaceColor', 'b', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_T4, 'Faces', faces, 'FaceColor', 'b', 'FaceAlpha', 0.5);
-
-            % moteur
-            patch('Vertices', vertices_mot_1, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_mot_2, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_mot_3, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
-            patch('Vertices', vertices_mot_4, 'Faces', faces, 'FaceColor', 'g', 'FaceAlpha', 0.5);
-
             % nacelle
             patch('Vertices', vertices_nacelle, 'Faces', faces, 'FaceColor', 'c', 'FaceAlpha', 0.5);
 
@@ -281,13 +200,13 @@ classdef Dirigeable
             quiver3(0,0,0, 0, scale, 0, 'k', 'LineWidth',2)
             quiver3(0,0,0, 0, 0, scale, 'k', 'LineWidth',2)
 
-            % thrust
-            x_t = (x_mot_1 + x_mot_2)/2;
-            y_t = (y_mot_1 + y_mot_2)/2;
-            quiver3(x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
-            quiver3(-x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
-            quiver3(-x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
-            quiver3(x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            % % thrust
+            % x_t = (x_mot_1 + x_mot_2)/2;
+            % y_t = (y_mot_1 + y_mot_2)/2;
+            % quiver3(x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            % quiver3(-x_t, y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            % quiver3(-x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
+            % quiver3(x_t, -y_t, z_mot, 0, 0, scale/2, 'Color', [1, 0.5, 0], 'LineWidth', 1)
 
             % weight
                 % structure moteur
@@ -316,9 +235,9 @@ classdef Dirigeable
             %% ---------------------------------- %%
 
             % Définir les axes pour l'ellipsoïde
-            a = 3;  % Rayon le long de l'axe x
-            b = 0.75;  % Rayon le long de l'axe y
-            c = 0.75;  % Rayon le long de l'axe z
+            a = 3;
+            b = 0.75;
+            c = 0.75; 
             
             % Créer un maillage pour les angles theta et phi
             [theta, phi] = meshgrid(linspace(0, 2*pi, 50), linspace(0, pi, 50));
@@ -330,9 +249,9 @@ classdef Dirigeable
             
             % Dessiner l'ellipsoïde
             h = surf(x, y, z);
-            h.FaceColor = 'blue';  % Ellipsoïde de couleur bleue
-            h.EdgeColor = 'none';  % Pas de lignes de grille
-            h.FaceAlpha = 0.25;  % Transparence à 50%
+            h.FaceColor = 'blue';
+            h.EdgeColor = 'none'; 
+            h.FaceAlpha = 0.25;
             
             % Ajustements visuels
             view(3);  % Vue 3D
