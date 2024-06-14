@@ -1,0 +1,15 @@
+Propulseur: Ethix
+Thrust vs Voltage: a = 0.048240, b = -0.010630, c = 0.009111
+Thrust vs Current: a = -0.066822, b = 0.762011, c = -0.033246
+Voltage vs Current: a = -0.492468, b = 3.182932, c = 0.924857
+
+Propulseur: HurrIcan
+Thrust vs Voltage: a = 0.047017, b = -0.048309, c = 0.039857
+Thrust vs Current: a = -0.058457, b = 0.778440, c = -0.044082
+Voltage vs Current: a = -0.617282, b = 3.706032, c = 0.982683
+
+Propulseur: QProp
+Thrust vs Voltage: a = 0.092389, b = 0.024877, c = -0.010041
+Thrust vs Current: a = -0.063873, b = 0.889364, c = 0.052709
+Voltage vs Current: a = -0.179605, b = 1.779226, c = 1.119240
+
